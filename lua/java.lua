@@ -9,6 +9,7 @@ local runner = require('java.api.runner')
 local profile_ui = require('java.ui.profile')
 local refactor = require('java.api.refactor')
 
+local neotest_jdtls = require('java.api.neotest')
 local global_config = require('java.config')
 
 local M = {}
@@ -76,6 +77,7 @@ M.runner.built_in.stop_app = runner.built_in.stop_app
 ----------------------------------------------------------------------
 M.profile = {}
 M.profile.ui = profile_ui.ui
+M.neotest_adapter = neotest_jdtls
 
 function M.__run()
 	test.debug_current_method()
