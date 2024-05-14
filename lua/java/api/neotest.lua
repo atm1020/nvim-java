@@ -1,5 +1,6 @@
 local JavaDap = require('java.dap')
 local async = require('java-core.utils.async').sync
+local async_n = require("neotest.async")
 local get_error_handler = require('java.handlers.error')
 local log = require('java-core.utils.log')
 local DapSetup = require('java-dap.api.setup')
@@ -251,7 +252,9 @@ function neotest.Adapter.build_spec(args)
 			projectName = m.projectName,
 			testLevel = 5,
 			testKind = m.testKind,
-			testNames = { 'com.example.demo.DemoApplicationTests' },
+			-- testNames = { 'com.example.demo.DemoApplicationTests' },
+			-- testNames = { vim.split(m.jdtHandler, '#')[1] },
+			testNames = { vim.split(m.fullName , '#' )[1] },
 		}
 	end
 
@@ -340,11 +343,16 @@ function neotest.Adapter.results(spec, result, tree)
 			local key = vim.split(ch.display_name, '%(')[1]
 			local value = {}
 			if ch.result.status == TestStatus.Failed then
+
+  			local results_path = async_n.fn.tempname()
+  			lib.files.write(results_path, table.concat(ch.result.trace, '\n'))
+				log.info('stream_path: ', results_path)
 				value = {
 					status = 'failed',
 					errors = {
-						{ message = table.concat(ch.result.trace, '\n') },
+						{ message = ch.result.trace[1] },
 					},
+					output = results_path,
 					short = ch.result.trace[1],
 				}
 			elseif ch.result.status == TestStatus.Skipped then
@@ -374,6 +382,7 @@ function neotest.Adapter.results(spec, result, tree)
 			if rr.errors then
 				res[data.id].errors = rr.errors
 				res[data.id].short = rr.short
+				res[data.id].output = rr.output
 			end
 		end
 	end
